@@ -6,32 +6,26 @@
     <title>Bienestar Estudiantil UPANA</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background-color: #f4f7f6; color: #333; }
-        h1 { color: #0056b3; }
+        h1 { color: #0056b3; margin-bottom: 5px; }
         
-        /* Estilos de contenedores */
-        .contenedor-media { max-width: 500px; margin: 0 auto; position: relative; }
-        video, img#vistaPrevia { width: 100%; border-radius: 12px; border: 3px solid #ddd; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        /* Contenedores */
+        .contenedor-media { max-width: 500px; margin: 20px auto; position: relative; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        video, img#vistaPrevia { width: 100%; border-radius: 8px; border: 2px solid #ddd; display: none; }
+        
+        /* Inputs Login */
+        .input-login { display: block; width: 90%; padding: 12px; margin: 10px auto; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }
         
         /* Botones */
-        .btn { font-size: 1.1em; padding: 12px 24px; margin: 10px; cursor: pointer; border: none; border-radius: 25px; transition: transform 0.2s; font-weight: bold; }
+        .btn { font-size: 1.1em; padding: 12px 24px; margin: 10px; cursor: pointer; border: none; border-radius: 25px; transition: transform 0.2s; font-weight: bold; width: 90%; max-width: 300px; }
         .btn:active { transform: scale(0.95); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
         .btn-primary { background-color: #0056b3; color: white; }
         .btn-secondary { background-color: #6c757d; color: white; }
         .btn-outline { background-color: transparent; border: 2px solid #0056b3; color: #0056b3; }
         
-        /* Secciones */
-        #menuInicial, #controlesCamara, #controlesSubida { margin-top: 20px; }
-        
-        /* Aviso de Privacidad */
-        #avisoPrivacidad { background-color: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; max-width: 600px; margin: 20px auto; text-align: left; }
-        
         /* Resultados */
-        #resultados { text-align: left; max-width: 600px; margin: 30px auto; }
-        #loader { display: none; font-size: 1.2em; margin-top: 20px; color: #0056b3; }
-        
-        .consejo { background-color: white; border-left: 5px solid #0056b3; border-radius: 4px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .consejo h3 { margin-top: 0; color: #333; }
-        .tag-duracion { background: #eef; color: #0056b3; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; }
+        .consejo { background-color: #fff; border-left: 5px solid #0056b3; border-radius: 4px; padding: 15px; margin-bottom: 15px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .tag-duracion { background: #eef; color: #0056b3; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; float: right; }
     </style>
 </head>
 <body>
@@ -39,26 +33,39 @@
     <h1>Bienestar Estudiantil</h1>
     <p>Universidad Panamericana de Guatemala</p>
 
-    <div id="pasoConsentimiento">
-        <div id="avisoPrivacidad">
-            <h3>🔒 Aviso de Privacidad</h3>
-            <p>Este servicio analizará tu expresión facial para ofrecerte consejos de bienestar. <strong>Tu foto no se almacenará</strong> y el análisis es privado. Al continuar, aceptas participar voluntariamente.</p>
-        </div>
+    <div id="pasoLogin" class="contenedor-media">
+        <h3 id="tituloLogin">🔐 Iniciar Sesión</h3>
+        
+        <input type="text" id="inputCarnet" placeholder="Ingresa tu Carnet" class="input-login">
+        <input type="password" id="inputPassword" placeholder="Contraseña" class="input-login">
+        
+        <p id="errorLogin" style="color: red; display: none; font-size: 0.9em;">Error</p>
+        <p id="exitoLogin" style="color: green; display: none; font-size: 0.9em;">¡Registro exitoso! Ingresa ahora.</p>
+
+        <button id="btnIngresar" class="btn btn-primary">Entrar</button>
+
+        <p style="margin-top: 15px; font-size: 0.9em;">
+            <span id="textoAlternar">¿No tienes cuenta?</span>
+            <a href="#" id="linkAlternar" style="color: #0056b3; font-weight: bold; text-decoration: none;">Regístrate aquí</a>
+        </p>
+    </div>
+
+    <div id="pasoConsentimiento" class="contenedor-media" style="display: none;">
+        <h3>🔒 Aviso de Privacidad</h3>
+        <p style="text-align: left; padding: 0 10px;">Este servicio analizará tu expresión facial para ofrecerte consejos de bienestar. <strong>Tu foto no se almacenará</strong> y el análisis es privado. Al continuar, aceptas participar voluntariamente.</p>
         <button id="btnAceptar" class="btn btn-primary">Acepto Participar</button>
     </div>
 
-    <div id="pasoSeleccion" style="display: none;">
+    <div id="pasoSeleccion" class="contenedor-media" style="display: none;">
         <h3>¿Cómo deseas analizar tu emoción?</h3>
         <button id="btnOpcionCamara" class="btn btn-primary">📷 Usar Cámara</button>
         <button id="btnOpcionSubir" class="btn btn-outline">📁 Subir Foto</button>
     </div>
 
-    <div id="pasoCaptura" style="display: none;">
-        <div class="contenedor-media">
-            <video id="video" autoplay playsinline></video>
-            <img id="vistaPrevia" alt="Vista previa de imagen subida">
-            <canvas id="canvas" style="display:none;"></canvas>
-        </div>
+    <div id="pasoCaptura" class="contenedor-media" style="display: none;">
+        <video id="video" autoplay playsinline></video>
+        <img id="vistaPrevia" alt="Vista previa">
+        <canvas id="canvas" style="display:none;"></canvas>
 
         <div id="controlesCamara" style="display:none;">
             <button id="btnCapturar" class="btn btn-primary">Analizar Ahora</button>
@@ -70,11 +77,11 @@
             <button id="btnAnalizarArchivo" class="btn btn-primary" style="display:none;">Analizar Imagen</button>
         </div>
 
-        <button id="btnVolver" class="btn btn-outline" style="margin-top: 20px;">⬅ Volver</button>
-        <div id="loader">🔄 Analizando tu estado emocional...</div>
+        <button id="btnVolver" class="btn btn-outline" style="margin-top: 10px;">⬅ Volver</button>
+        <div id="loader" style="display: none; margin-top: 15px; color: #0056b3;">🔄 Analizando...</div>
     </div>
 
-    <div id="resultados"></div>
+    <div id="resultados" class="contenedor-media" style="display: none;"></div>
     <button id="btnReiniciar" class="btn btn-secondary" style="display: none;">Nueva Consulta</button>
 
     <script>
@@ -83,163 +90,179 @@
         const API_URL = "https://bgb7u5s69l.execute-api.us-east-2.amazonaws.com/default/detectarEmocionBienestar"; 
         // ==========================================
 
-        // Elementos del DOM
+        // Variables DOM
+        const pasoLogin = document.getElementById('pasoLogin');
         const pasoConsentimiento = document.getElementById('pasoConsentimiento');
         const pasoSeleccion = document.getElementById('pasoSeleccion');
         const pasoCaptura = document.getElementById('pasoCaptura');
+        const resultadosDiv = document.getElementById('resultados');
         
+        // Login
+        const btnIngresar = document.getElementById('btnIngresar');
+        const linkAlternar = document.getElementById('linkAlternar');
+        const tituloLogin = document.getElementById('tituloLogin');
+        let esModoRegistro = false;
+
+        // Medios
         const video = document.getElementById('video');
         const vistaPrevia = document.getElementById('vistaPrevia');
         const canvas = document.getElementById('canvas');
         const inputArchivo = document.getElementById('inputArchivo');
-        
-        // Variables de control
         let streamCamara = null;
-        let modoActual = ''; // 'camara' o 'archivo'
         let imagenBase64Final = '';
 
-        // --- FLUJO PRINCIPAL ---
+        // --- LÓGICA DE LOGIN ---
+        linkAlternar.onclick = (e) => {
+            e.preventDefault();
+            esModoRegistro = !esModoRegistro;
+            document.getElementById('errorLogin').style.display = 'none';
+            document.getElementById('exitoLogin').style.display = 'none';
+            
+            if (esModoRegistro) {
+                tituloLogin.innerText = "📝 Registro";
+                btnIngresar.innerText = "Registrarme";
+                document.getElementById('textoAlternar').innerText = "¿Ya tienes cuenta?";
+                linkAlternar.innerText = "Inicia sesión";
+            } else {
+                tituloLogin.innerText = "🔐 Iniciar Sesión";
+                btnIngresar.innerText = "Entrar";
+                document.getElementById('textoAlternar').innerText = "¿No tienes cuenta?";
+                linkAlternar.innerText = "Regístrate aquí";
+            }
+        };
 
-        // 1. Aceptar Consentimiento
+        btnIngresar.onclick = async () => {
+            const carnet = document.getElementById('inputCarnet').value;
+            const pass = document.getElementById('inputPassword').value;
+            if (!carnet || !pass) return alert("Llena los campos");
+
+            btnIngresar.disabled = true;
+            btnIngresar.innerText = "Procesando...";
+            const errorLog = document.getElementById('errorLogin');
+            errorLog.style.display = 'none';
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accion: esModoRegistro ? 'registro' : 'login', carnet, password: pass })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.autorizado) {
+                    if (esModoRegistro) {
+                        document.getElementById('exitoLogin').style.display = 'block';
+                        setTimeout(() => linkAlternar.click(), 1500);
+                    } else {
+                        pasoLogin.style.display = 'none';
+                        pasoConsentimiento.style.display = 'block';
+                    }
+                } else {
+                    errorLog.style.display = 'block';
+                    errorLog.innerText = data.mensaje || "Error";
+                }
+            } catch (e) {
+                console.error(e);
+                errorLog.style.display = 'block';
+                errorLog.innerText = "Error de conexión";
+            }
+            btnIngresar.disabled = false;
+            btnIngresar.innerText = esModoRegistro ? "Registrarme" : "Entrar";
+        };
+
+        // --- FLUJO PRINCIPAL ---
         document.getElementById('btnAceptar').onclick = () => {
             pasoConsentimiento.style.display = 'none';
             pasoSeleccion.style.display = 'block';
         };
 
-        // 2. Opción: Usar Cámara
         document.getElementById('btnOpcionCamara').onclick = async () => {
-            modoActual = 'camara';
-            mostrarAreaCaptura();
-            document.getElementById('controlesCamara').style.display = 'block';
-            video.style.display = 'block';
-            vistaPrevia.style.display = 'none';
-            await iniciarCamara();
-        };
-
-        // 3. Opción: Subir Archivo
-        document.getElementById('btnOpcionSubir').onclick = () => {
-            modoActual = 'archivo';
-            mostrarAreaCaptura();
-            document.getElementById('controlesSubida').style.display = 'block';
-            video.style.display = 'none';
-            vistaPrevia.style.display = 'block';
-            // Disparar click en el input oculto
-            inputArchivo.click();
-        };
-
-        // --- LÓGICA DE CÁMARA ---
-        async function iniciarCamara() {
+            mostrarCaptura('camara');
             try {
                 streamCamara = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = streamCamara;
-            } catch (err) {
-                alert("No se pudo acceder a la cámara. Verifica los permisos.");
-                volverAlMenu();
+                video.style.display = 'block';
+            } catch (e) { alert("Error cámara"); volver(); }
+        };
+
+        document.getElementById('btnOpcionSubir').onclick = () => {
+            mostrarCaptura('archivo');
+            inputArchivo.click();
+        };
+
+        function mostrarCaptura(modo) {
+            pasoSeleccion.style.display = 'none';
+            pasoCaptura.style.display = 'block';
+            if (modo === 'camara') {
+                document.getElementById('controlesCamara').style.display = 'block';
+            } else {
+                document.getElementById('controlesSubida').style.display = 'block';
+                vistaPrevia.style.display = 'block';
             }
         }
 
+        // --- CAPTURA ---
         document.getElementById('btnCapturar').onclick = () => {
-            // Dibujar video en canvas para obtener imagen
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            imagenBase64Final = canvas.toDataURL('image/jpeg');
-            enviarImagen(imagenBase64Final);
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            enviarImagen(canvas.toDataURL('image/jpeg'));
         };
-
-        // --- LÓGICA DE SUBIDA DE ARCHIVO ---
-        document.getElementById('btnSeleccionarArchivo').onclick = () => inputArchivo.click();
 
         inputArchivo.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    // Mostrar previsualización
-                    vistaPrevia.src = event.target.result;
-                    imagenBase64Final = event.target.result; // Guardar el base64
+                reader.onload = (ev) => {
+                    vistaPrevia.src = ev.target.result;
+                    imagenBase64Final = ev.target.result;
                     document.getElementById('btnAnalizarArchivo').style.display = 'inline-block';
                 };
                 reader.readAsDataURL(file);
             }
         };
 
-        document.getElementById('btnAnalizarArchivo').onclick = () => {
-            if (imagenBase64Final) {
-                enviarImagen(imagenBase64Final);
-            }
-        };
+        document.getElementById('btnAnalizarArchivo').onclick = () => enviarImagen(imagenBase64Final);
 
-        // --- FUNCIONES COMUNES ---
-
-        function mostrarAreaCaptura() {
-            pasoSeleccion.style.display = 'none';
-            pasoCaptura.style.display = 'block';
-        }
-
-        function volverAlMenu() {
-            // Detener cámara si está encendida
-            if (streamCamara) {
-                streamCamara.getTracks().forEach(track => track.stop());
-            }
-            pasoCaptura.style.display = 'none';
-            pasoSeleccion.style.display = 'block';
-            document.getElementById('controlesCamara').style.display = 'none';
-            document.getElementById('controlesSubida').style.display = 'none';
-            document.getElementById('resultados').innerHTML = '';
-            document.getElementById('btnReiniciar').style.display = 'none';
-            video.style.display = 'none';
-            vistaPrevia.style.display = 'none';
-            vistaPrevia.src = '';
-            document.getElementById('btnAnalizarArchivo').style.display = 'none';
-        }
-
-        document.getElementById('btnVolver').onclick = volverAlMenu;
-        document.getElementById('btnReiniciar').onclick = volverAlMenu;
-
-        // --- ENVÍO A LA API (BACKEND) ---
-        async function enviarImagen(base64String) {
+        // --- ENVÍO ---
+        async function enviarImagen(base64) {
             document.getElementById('loader').style.display = 'block';
             document.getElementById('controlesCamara').style.display = 'none';
             document.getElementById('controlesSubida').style.display = 'none';
-            document.getElementById('btnVolver').style.display = 'none';
-
+            
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64String })
+                    body: JSON.stringify({ image: base64 }) // Acción por defecto es analizar
                 });
-
-                if (!response.ok) throw new Error("Error en la API");
-
-                const data = await response.json();
+                const data = await res.json();
                 mostrarResultados(data);
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('resultados').innerHTML = '<p style="color:red">Ocurrió un error al analizar la imagen. Intenta de nuevo.</p>';
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('btnReiniciar').style.display = 'inline-block';
+            } catch (e) {
+                resultadosDiv.innerHTML = '<p style="color:red">Error al analizar.</p>';
+                resultadosDiv.style.display = 'block';
             }
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('btnReiniciar').style.display = 'inline-block';
+            pasoCaptura.style.display = 'none';
         }
 
         function mostrarResultados(data) {
-            let html = `<h2>Estado detectado: <span style="color:#0056b3">${data.emocion}</span> (${data.confianza})</h2>`;
-            html += '<p>Aquí tienes algunos consejos para ti:</p>';
-            
+            resultadosDiv.style.display = 'block';
+            let html = `<h2>Estado: <span style="color:#0056b3">${data.emocion}</span> (${data.confianza})</h2>`;
+            if(data.consejos.length > 0) html += '<p>Consejos para ti:</p>';
             data.consejos.forEach(c => {
-                html += `
-                    <div class="consejo">
-                        <h3>${c.titulo} <span class="tag-duracion">⏱ ${c.duracion}</span></h3>
-                        <p>${c.texto}</p>
-                    </div>
-                `;
+                html += `<div class="consejo"><h3>${c.titulo} <span class="tag-duracion">${c.duracion}</span></h3><p>${c.texto}</p></div>`;
             });
-            document.getElementById('resultados').innerHTML = html;
+            resultadosDiv.innerHTML = html;
         }
+
+        function volver() {
+            if (streamCamara) streamCamara.getTracks().forEach(t => t.stop());
+            location.reload();
+        }
+        document.getElementById('btnVolver').onclick = volver;
+        document.getElementById('btnReiniciar').onclick = volver;
     </script>
 </body>
 </html>

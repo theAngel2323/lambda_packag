@@ -1,10 +1,14 @@
 import sqlite3
 
-# 1. Conectar (esto crea el archivo si no existe)
-conn = sqlite3.connect('consejos.db')
+# Nombre del archivo de base de datos
+db_name = 'consejos.db'
+
+conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
-# 2. Crear la tabla con código SQL
+print("1. Creando tablas...")
+
+# --- TABLA DE CONSEJOS ---
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS Consejos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +20,21 @@ cursor.execute('''
     )
 ''')
 
-# 3. Insertar los datos (Los consejos)
+# --- TABLA DE USUARIOS (Login/Registro) ---
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Usuarios (
+        carnet TEXT PRIMARY KEY,
+        password TEXT NOT NULL
+    )
+''')
+
+print("2. Insertando datos iniciales...")
+
+# Insertar Usuario de Prueba
+# Carnet: 2023001, Pass: upana123
+cursor.execute("INSERT OR REPLACE INTO Usuarios (carnet, password) VALUES (?, ?)", ('2023001', 'upana123'))
+
+# Insertar Consejos de Bienestar
 consejos_lista = [
     ('FEAR', 'Respiración', 'Respiración 4-7-8', 'Inhala por 4s, sostén 7s, exhala por 8s.', '2 min'),
     ('FEAR', 'Grounding', '5-4-3-2-1', 'Identifica 5 cosas que ves, 4 que tocas, 3 que oyes...', '3 min'),
@@ -33,8 +51,7 @@ cursor.executemany('''
     VALUES (?, ?, ?, ?, ?)
 ''', consejos_lista)
 
-# 4. Guardar cambios y cerrar
 conn.commit()
 conn.close()
 
-print("¡Base de datos 'consejos.db' creada exitosamente!")
+print(f"¡Listo! Base de datos '{db_name}' creada exitosamente.")
