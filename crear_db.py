@@ -1,16 +1,29 @@
 import sqlite3
+import os
 
 # Nombre del archivo de base de datos
 db_name = 'consejos.db'
 
+# Opcional: Eliminar el archivo físico antes de empezar para asegurar limpieza total
+if os.path.exists(db_name):
+    os.remove(db_name)
+    print("Base de datos anterior eliminada.")
+
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
-print("1. Creando tablas...")
+print("1. Reiniciando tablas...")
+
+# --- PASO CRÍTICO: BORRAR TABLAS SI EXISTEN ---
+# Esto evita que los datos se dupliquen si corres el script varias veces
+cursor.execute("DROP TABLE IF EXISTS Consejos")
+cursor.execute("DROP TABLE IF EXISTS Usuarios")
+
+print("2. Creando tablas nuevas...")
 
 # --- TABLA DE CONSEJOS ---
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Consejos (
+    CREATE TABLE Consejos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         emocion TEXT NOT NULL,
         categoria TEXT,
@@ -22,17 +35,16 @@ cursor.execute('''
 
 # --- TABLA DE USUARIOS (Login/Registro) ---
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Usuarios (
+    CREATE TABLE Usuarios (
         carnet TEXT PRIMARY KEY,
         password TEXT NOT NULL
     )
 ''')
 
-print("2. Insertando datos iniciales...")
+print("3. Insertando datos...")
 
 # Insertar Usuario de Prueba
-# Carnet: 2023001, Pass: upana123
-cursor.execute("INSERT OR REPLACE INTO Usuarios (carnet, password) VALUES (?, ?)", ('2023001', 'upana123'))
+cursor.execute("INSERT INTO Usuarios (carnet, password) VALUES (?, ?)", ('2023001', 'upana123'))
 
 # Insertar Consejos de Bienestar
 consejos_lista = [
@@ -65,7 +77,6 @@ consejos_lista = [
     ('NEUTRAL', 'Activación', 'Hidratación', 'Bebe un vaso de agua para refrescar cuerpo y mente.', '1 min'),
 ]
 
-
 cursor.executemany('''
     INSERT INTO Consejos (emocion, categoria, titulo, texto, duracion) 
     VALUES (?, ?, ?, ?, ?)
@@ -74,4 +85,4 @@ cursor.executemany('''
 conn.commit()
 conn.close()
 
-print(f"¡Listo! Base de datos '{db_name}' creada exitosamente.")
+print(f"¡Listo! Base de datos '{db_name}' regenerada sin duplicados.")
