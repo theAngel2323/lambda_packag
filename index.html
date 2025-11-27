@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienestar Estudiantil UPANA</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
@@ -25,6 +27,12 @@
             border-color: #0456ae;
             background-color: #e6f0ff;
         }
+        /* Animación suave para la barra de progreso */
+        .strength-bar {
+            transition: background-color 0.3s ease, width 0.3s ease;
+        }
+        /* Centrado del captcha */
+        .g-recaptcha { display: flex; justify-content: center; }
     </style>
     <script>
         tailwind.config = {
@@ -46,7 +54,6 @@
     </script>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
-    <!-- Botón Cerrar Sesión (Flotante) -->
     <button id="btnCerrarSesion" class="fixed top-6 right-6 z-50 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg shadow-md font-bold transition-colors hidden">
         Cerrar Sesión 🚪
     </button>
@@ -54,7 +61,6 @@
     <div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 overflow-x-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/10 dark:from-primary/20 dark:to-primary/20"></div>
         
-        <!-- Paso 1: Login -->
         <div id="pasoLogin" class="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10">
             <div class="flex flex-col p-8 md:p-10">
                 <div class="flex flex-col items-center mb-6">
@@ -91,15 +97,42 @@
                             <p class="text-[#111418] dark:text-slate-300 text-sm font-medium leading-normal pb-2">Contraseña</p>
                             <div class="relative flex w-full flex-1 items-stretch rounded-lg">
                                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">lock</span>
-                                <input id="inputPassword" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-4 text-base font-normal leading-normal" placeholder="••••••••" type="password" value=""/>
+                                <input id="inputPassword" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-12 text-base font-normal leading-normal" placeholder="••••••••" type="password" value=""/>
+                                <button type="button" id="btnTogglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary focus:outline-none">
+                                    <span class="material-symbols-outlined text-xl">visibility_off</span>
+                                </button>
                             </div>
                         </label>
                     </div>
+
+                    <div id="seccionRequisitos" class="hidden flex-col gap-2 mt-1 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <p class="text-primary dark:text-blue-400 text-sm font-medium mb-1">Seguridad de la contraseña:</p>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span id="textoFortaleza" class="text-xs font-bold text-slate-400 w-14">Débil</span>
+                            <div class="flex flex-1 gap-1 h-2">
+                                <div id="barra1" class="flex-1 bg-slate-200 rounded-full strength-bar"></div>
+                                <div id="barra2" class="flex-1 bg-slate-200 rounded-full strength-bar"></div>
+                                <div id="barra3" class="flex-1 bg-slate-200 rounded-full strength-bar"></div>
+                            </div>
+                        </div>
+                        <ul class="space-y-1">
+                            <li id="req-length" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span> Mínimo 8 caracteres</li>
+                            <li id="req-lower" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span> Una minúscula</li>
+                            <li id="req-upper" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span> Una mayúscula</li>
+                            <li id="req-number" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span> Un número</li>
+                            <li id="req-symbol" class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span> Un símbolo ($%?@!_*)</li>
+                        </ul>
+                    </div>
+
+                    <div id="contenedorCaptcha" class="hidden flex-col items-center justify-center mt-4">
+                        <p id="avisoCaptcha" class="text-red-500 text-xs font-bold mb-2 hidden">⚠️ Hemos detectado varios intentos fallidos.</p>
+                        <div class="g-recaptcha" data-sitekey="6LfMlBUsAAAAAKHim8q37G6N5meSTzc3k3OChbk4"></div>
+                    </div>
                     
-                    <div id="errorLogin" class="text-red-500 text-sm hidden mt-2"></div>
-                    <div id="exitoLogin" class="text-green-500 text-sm hidden mt-2">¡Registro exitoso! Ingresa ahora.</div>
+                    <div id="errorLogin" class="text-red-500 text-sm hidden mt-2 text-center"></div>
+                    <div id="exitoLogin" class="text-green-500 text-sm hidden mt-2 text-center">¡Registro exitoso! Ingresa ahora.</div>
                     
-                    <button id="btnIngresar" class="flex items-center justify-center w-full h-12 px-6 mt-4 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:ring-offset-slate-900 transition-transform active:scale-95" type="button">Entrar</button>
+                    <button id="btnIngresar" class="flex items-center justify-center w-full h-12 px-6 mt-4 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:ring-offset-slate-900 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" type="button">Entrar</button>
                 </div>
                 
                 <div class="mt-6 text-center">
@@ -111,7 +144,6 @@
             </div>
         </div>
         
-        <!-- Paso 2: Consentimiento -->
         <div id="pasoConsentimiento" class="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10 hidden">
             <div class="flex flex-col p-8 md:p-10">
                 <div class="flex justify-center mb-4">
@@ -119,50 +151,10 @@
                         <span class="material-symbols-outlined !text-5xl">privacy_tip</span>
                     </div>
                 </div>
-                
                 <h2 class="text-[#111418] dark:text-white tracking-tight text-2xl sm:text-3xl font-bold leading-tight pb-2 text-center">Aviso sobre el Análisis Facial</h2>
                 <p class="text-gray-600 dark:text-gray-300 text-base font-normal leading-normal pb-6 text-center">
-                    Para ayudarte a entender tus emociones, la app usará tu cámara para analizar tus expresiones faciales. Tu privacidad es nuestra prioridad.
+                    Para ayudarte a entender tus emociones, la app usará tu cámara. Tu privacidad es nuestra prioridad.
                 </p>
-                
-                <div class="flex flex-col gap-4 text-left pb-8">
-                    <div class="flex items-start gap-4 bg-transparent min-h-[72px] py-2 justify-between">
-                        <div class="flex items-start gap-4">
-                            <div class="text-primary dark:text-white flex items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0 size-12 mt-1">
-                                <span class="material-symbols-outlined">no_photography</span>
-                            </div>
-                            <div class="flex flex-col justify-center">
-                                <p class="text-[#111418] dark:text-white text-base font-medium leading-normal">Tus fotos no se guardan</p>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Las imágenes nunca se almacenan en nuestros servidores y se procesan en tiempo real.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-4 bg-transparent min-h-[72px] py-2 justify-between">
-                        <div class="flex items-start gap-4">
-                            <div class="text-primary dark:text-white flex items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0 size-12 mt-1">
-                                <span class="material-symbols-outlined">encrypted</span>
-                            </div>
-                            <div class="flex flex-col justify-center">
-                                <p class="text-[#111418] dark:text-white text-base font-medium leading-normal">Análisis 100% privado</p>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">El análisis se procesa de forma anónima directamente en tu dispositivo.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-4 bg-transparent min-h-[72px] py-2 justify-between">
-                        <div class="flex items-start gap-4">
-                            <div class="text-primary dark:text-white flex items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0 size-12 mt-1">
-                                <span class="material-symbols-outlined">sentiment_satisfied</span>
-                            </div>
-                            <div class="flex flex-col justify-center">
-                                <p class="text-[#111418] dark:text-white text-base font-medium leading-normal">Enfoque en tu bienestar</p>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">El único objetivo es ofrecerte apoyo y consejos para tu bienestar emocional.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="flex flex-col gap-2 w-full">
                     <button id="btnAceptar" class="flex items-center justify-center gap-2 px-6 py-3 h-12 rounded-full bg-primary text-white text-base font-bold leading-normal w-full hover:bg-primary/90 transition-colors">
                         Acepto participar
@@ -171,32 +163,25 @@
             </div>
         </div>
         
-        <!-- Paso 3: Selección de método -->
         <div id="pasoSeleccion" class="relative w-full max-w-4xl bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10 hidden">
             <div class="flex flex-col p-8 md:p-10">
                 <h1 class="text-[#111418] dark:text-gray-100 tracking-tight text-3xl md:text-4xl font-bold leading-tight px-4 text-center pb-3 pt-6">Hola, ¿cómo te sientes hoy?</h1>
-                <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal pb-8 pt-1 px-4 text-center">Elige cómo quieres empezar tu análisis.</p>
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl px-4 py-3">
                     <button id="btnOpcionCamara" class="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 group cursor-pointer text-center">
                         <span class="material-symbols-outlined text-5xl text-primary mb-4">videocam</span>
-                        <span class="text-lg font-bold text-[#111418] dark:text-gray-200 group-hover:text-primary dark:group-hover:text-primary transition-colors">Analizar con Cámara</span>
+                        <span class="text-lg font-bold text-[#111418] dark:text-gray-200 group-hover:text-primary">Analizar con Cámara</span>
                     </button>
-                    
                     <button id="btnOpcionSubir" class="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 group cursor-pointer text-center">
                         <span class="material-symbols-outlined text-5xl text-primary mb-4">upload_file</span>
-                        <span class="text-lg font-bold text-[#111418] dark:text-gray-200 group-hover:text-primary dark:group-hover:text-primary transition-colors">Subir una Foto</span>
+                        <span class="text-lg font-bold text-[#111418] dark:text-gray-200 group-hover:text-primary">Subir una Foto</span>
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- Paso 4: Captura de imagen - CÁMARA -->
         <div id="pasoCapturaCamara" class="relative w-full max-w-2xl bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10 hidden">
             <div class="flex flex-col p-6 md:p-8">
                 <h2 class="text-[#111418] dark:text-white text-2xl font-bold leading-tight text-center mb-6">Analiza tu Emoción - Cámara</h2>
-                
-                <!-- Contenedor de cámara -->
                 <div class="w-full bg-gray-200 dark:bg-gray-900 rounded-lg mb-6 overflow-hidden">
                     <video id="video" class="w-full rounded-lg" autoplay playsinline style="display: none;"></video>
                     <div id="placeholderCamara" class="flex flex-col items-center justify-center text-gray-500 p-8 min-h-[300px]">
@@ -205,35 +190,23 @@
                     </div>
                 </div>
                 <canvas id="canvas" style="display:none;"></canvas>
-                
-                <!-- Controles de cámara -->
                 <div id="controlesCamara">
                     <button id="btnCapturar" class="flex items-center justify-center w-full h-12 px-6 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 transition-colors mb-4">
-                        <span class="material-symbols-outlined mr-2">camera</span>
-                        Capturar y Analizar
+                        <span class="material-symbols-outlined mr-2">camera</span> Capturar y Analizar
                     </button>
                 </div>
-                
                 <button id="btnVolverCamara" class="flex items-center justify-center w-full h-12 px-6 mt-4 text-base font-medium text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <span class="material-symbols-outlined mr-2">arrow_back</span>
-                    Volver
+                    <span class="material-symbols-outlined mr-2">arrow_back</span> Volver
                 </button>
-                
                 <div id="loaderCamara" class="hidden mt-4 text-center text-primary">
-                    <div class="inline-flex items-center">
-                        <span class="material-symbols-outlined animate-spin mr-2">refresh</span>
-                        Analizando...
-                    </div>
+                    <div class="inline-flex items-center"><span class="material-symbols-outlined animate-spin mr-2">refresh</span> Analizando...</div>
                 </div>
             </div>
         </div>
 
-        <!-- Paso 4: Captura de imagen - SUBIR ARCHIVO -->
         <div id="pasoCapturaArchivo" class="relative w-full max-w-2xl bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10 hidden">
             <div class="flex flex-col p-6 md:p-8">
                 <h2 class="text-[#111418] dark:text-white text-2xl font-bold leading-tight text-center mb-6">Analiza tu Emoción - Subir Foto</h2>
-                
-                <!-- Vista previa de imagen subida -->
                 <div class="w-full bg-gray-200 dark:bg-gray-900 rounded-lg mb-6 overflow-hidden">
                     <img id="vistaPrevia" class="w-full rounded-lg" alt="Vista previa" style="display: none;">
                     <div id="placeholderArchivo" class="flex flex-col items-center justify-center text-gray-500 p-8 min-h-[300px]">
@@ -241,72 +214,44 @@
                         <p>Vista previa de la imagen</p>
                     </div>
                 </div>
-                
-                <!-- Controles de subida -->
                 <div id="controlesSubida">
-                    <!-- Zona de arrastrar y soltar -->
                     <div id="dropZone" class="drop-zone flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 mb-4 cursor-pointer transition-all duration-300 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800">
                         <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">cloud_upload</span>
-                        <p class="text-gray-600 dark:text-gray-400 text-center mb-2">
-                            <span class="font-medium text-primary">Haz clic para subir</span> o arrastra y suelta tu imagen aquí
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-500 text-sm text-center">
-                            Formatos soportados: JPG, PNG, WEBP
-                        </p>
+                        <p class="text-gray-600 dark:text-gray-400 text-center mb-2"><span class="font-medium text-primary">Haz clic para subir</span> o arrastra</p>
                         <input type="file" id="inputArchivo" accept="image/*" class="hidden">
                     </div>
-                    
-                    <!-- Estado cuando no hay imagen seleccionada -->
                     <div id="estadoSinImagen" class="text-center">
                         <button id="btnSeleccionarArchivo" class="flex items-center justify-center w-full h-12 px-6 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 transition-colors mb-2">
-                            <span class="material-symbols-outlined mr-2">upload</span>
-                            Seleccionar Imagen
+                            <span class="material-symbols-outlined mr-2">upload</span> Seleccionar Imagen
                         </button>
                     </div>
-                    
-                    <!-- Estado cuando ya hay imagen seleccionada -->
                     <div id="estadoConImagen" class="hidden">
                         <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
-                            <div class="flex items-center">
-                                <span class="material-symbols-outlined text-green-500 mr-2">check_circle</span>
-                                <p class="text-green-700 dark:text-green-300 text-sm font-medium">Imagen seleccionada correctamente</p>
-                            </div>
+                            <div class="flex items-center"><span class="material-symbols-outlined text-green-500 mr-2">check_circle</span><p class="text-green-700 dark:text-green-300 text-sm font-medium">Imagen seleccionada correctamente</p></div>
                         </div>
                         <button id="btnAnalizarArchivo" class="flex items-center justify-center w-full h-12 px-6 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 transition-colors mb-2">
-                            <span class="material-symbols-outlined mr-2">psychology</span>
-                            Analizar Imagen
+                            <span class="material-symbols-outlined mr-2">psychology</span> Analizar Imagen
                         </button>
                         <button id="btnCambiarImagen" class="flex items-center justify-center w-full h-12 px-6 text-base font-medium text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                            <span class="material-symbols-outlined mr-2">image</span>
-                            Cambiar Imagen
+                            <span class="material-symbols-outlined mr-2">image</span> Cambiar Imagen
                         </button>
                     </div>
                 </div>
-                
                 <button id="btnVolverArchivo" class="flex items-center justify-center w-full h-12 px-6 mt-4 text-base font-medium text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <span class="material-symbols-outlined mr-2">arrow_back</span>
-                    Volver
+                    <span class="material-symbols-outlined mr-2">arrow_back</span> Volver
                 </button>
-                
                 <div id="loaderArchivo" class="hidden mt-4 text-center text-primary">
-                    <div class="inline-flex items-center">
-                        <span class="material-symbols-outlined animate-spin mr-2">refresh</span>
-                        Analizando...
-                    </div>
+                    <div class="inline-flex items-center"><span class="material-symbols-outlined animate-spin mr-2">refresh</span> Analizando...</div>
                 </div>
             </div>
         </div>
         
-        <!-- Paso 5: Resultados -->
         <div id="resultados" class="relative w-full max-w-2xl bg-white dark:bg-slate-900 shadow-xl rounded-lg overflow-hidden z-10 hidden">
             <div class="flex flex-col p-6 md:p-8">
                 <h2 class="text-[#111418] dark:text-white text-2xl font-bold leading-tight text-center mb-6">Resultados de tu Análisis Emocional</h2>
-                
                 <div id="contenidoResultados"></div>
-                
                 <button id="btnReiniciar" class="flex items-center justify-center w-full h-12 px-6 mt-6 text-base font-medium text-white bg-primary rounded-lg shadow-md hover:bg-primary/90 transition-colors">
-                    <span class="material-symbols-outlined mr-2">refresh</span>
-                    Nueva Consulta
+                    <span class="material-symbols-outlined mr-2">refresh</span> Nueva Consulta
                 </button>
             </div>
         </div>
@@ -318,7 +263,7 @@
         const API_URL = "https://bgb7u5s69l.execute-api.us-east-2.amazonaws.com/default/detectarEmocionBienestar"; 
         // ==========================================
 
-        // Variables DOM
+        // Variables DOM Generales
         const pasoLogin = document.getElementById('pasoLogin');
         const pasoConsentimiento = document.getElementById('pasoConsentimiento');
         const pasoSeleccion = document.getElementById('pasoSeleccion');
@@ -328,12 +273,22 @@
         const contenidoResultados = document.getElementById('contenidoResultados');
         const btnCerrarSesion = document.getElementById('btnCerrarSesion');
         
-        // Login
+        // Login y Registro
         const btnIngresar = document.getElementById('btnIngresar');
         const linkAlternar = document.getElementById('linkAlternar');
+        const inputCarnet = document.getElementById('inputCarnet');
+        const inputPassword = document.getElementById('inputPassword');
+        const btnTogglePassword = document.getElementById('btnTogglePassword');
+        const seccionRequisitos = document.getElementById('seccionRequisitos');
+        const contenedorCaptcha = document.getElementById('contenedorCaptcha');
+        const avisoCaptcha = document.getElementById('avisoCaptcha');
+        const errorLog = document.getElementById('errorLogin');
+        
         let esModoRegistro = false;
+        let passwordValida = false;
+        let intentosFallidos = 0;
 
-        // Medios - SEPARADOS POR MODO
+        // Medios
         const video = document.getElementById('video');
         const vistaPrevia = document.getElementById('vistaPrevia');
         const placeholderCamara = document.getElementById('placeholderCamara');
@@ -343,60 +298,135 @@
         let streamCamara = null;
         let imagenBase64Final = '';
 
-        // --- LÓGICA DE LOGIN ---
-        linkAlternar.onclick = (e) => {
-            e.preventDefault();
+        // --- LÓGICA DE VISIBILIDAD CONTRASEÑA ---
+        btnTogglePassword.onclick = () => {
+            const type = inputPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            inputPassword.setAttribute('type', type);
+            btnTogglePassword.querySelector('.material-symbols-outlined').innerText = type === 'password' ? 'visibility_off' : 'visibility';
+        };
+
+        // --- LÓGICA DE VALIDACIÓN DE CONTRASEÑA ---
+        inputPassword.addEventListener('input', (e) => {
+            if (!esModoRegistro) return;
+            const val = e.target.value;
+            
+            const hasLength = val.length >= 8;
+            const hasLower = /[a-z]/.test(val);
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNumber = /\d/.test(val);
+            const hasSymbol = /[$%?@!_*]/.test(val) || /[^A-Za-z0-9]/.test(val);
+
+            updateRequirement('req-length', hasLength);
+            updateRequirement('req-lower', hasLower);
+            updateRequirement('req-upper', hasUpper);
+            updateRequirement('req-number', hasNumber);
+            updateRequirement('req-symbol', hasSymbol);
+
+            const score = [hasLength, hasLower, hasUpper, hasNumber, hasSymbol].filter(Boolean).length;
+            updateStrengthMeter(score);
+
+            passwordValida = (score === 5);
+            btnIngresar.disabled = !passwordValida;
+            if(!passwordValida) btnIngresar.classList.add('opacity-50', 'cursor-not-allowed');
+            else btnIngresar.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+
+        function updateRequirement(id, isValid) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('.material-symbols-outlined');
+            if (isValid) {
+                el.classList.remove('text-slate-500', 'dark:text-slate-400');
+                el.classList.add('text-green-600', 'dark:text-green-400', 'font-medium');
+                icon.innerText = 'check_circle';
+            } else {
+                el.classList.add('text-slate-500', 'dark:text-slate-400');
+                el.classList.remove('text-green-600', 'dark:text-green-400', 'font-medium');
+                icon.innerText = 'radio_button_unchecked';
+            }
+        }
+
+        function updateStrengthMeter(score) {
+            const bars = [document.getElementById('barra1'), document.getElementById('barra2'), document.getElementById('barra3')];
+            const texto = document.getElementById('textoFortaleza');
+            bars.forEach(b => b.className = 'flex-1 bg-slate-200 rounded-full strength-bar');
+            
+            if (score <= 2) {
+                texto.innerText = "Débil"; texto.className = "text-xs font-bold text-red-500 w-14";
+                if (score > 0) bars[0].classList.replace('bg-slate-200', 'bg-red-500');
+            } else if (score <= 4) {
+                texto.innerText = "Media"; texto.className = "text-xs font-bold text-yellow-500 w-14";
+                bars[0].classList.replace('bg-slate-200', 'bg-yellow-500');
+                bars[1].classList.replace('bg-slate-200', 'bg-yellow-500');
+            } else {
+                texto.innerText = "Fuerte"; texto.className = "text-xs font-bold text-green-500 w-14";
+                bars.forEach(b => b.classList.replace('bg-slate-200', 'bg-green-500'));
+            }
+        }
+
+        // --- LÓGICA DE CAMBIO LOGIN/REGISTRO ---
+        function toggleAuthMode() {
             esModoRegistro = !esModoRegistro;
-            document.getElementById('errorLogin').style.display = 'none';
+            errorLog.style.display = 'none';
             document.getElementById('exitoLogin').style.display = 'none';
             
             if (esModoRegistro) {
+                // Modo Registro
                 btnIngresar.innerText = "Registrarme";
                 document.getElementById('textoAlternar').innerText = "¿Ya tienes cuenta?";
                 linkAlternar.innerText = "Inicia sesión";
-                
-                // Actualizar radio buttons
-                document.querySelectorAll('input[name="auth-toggle"]')[0].checked = false;
+                seccionRequisitos.style.display = 'flex';
                 document.querySelectorAll('input[name="auth-toggle"]')[1].checked = true;
+                // CAPTCHA: Mostrar siempre en registro
+                contenedorCaptcha.classList.remove('hidden');
+                avisoCaptcha.classList.add('hidden');
+                inputPassword.dispatchEvent(new Event('input')); // Revalidar pass
             } else {
+                // Modo Login
                 btnIngresar.innerText = "Entrar";
                 document.getElementById('textoAlternar').innerText = "¿No tienes cuenta?";
                 linkAlternar.innerText = "Regístrate aquí";
-                
-                // Actualizar radio buttons
+                seccionRequisitos.style.display = 'none';
+                btnIngresar.disabled = false;
+                btnIngresar.classList.remove('opacity-50', 'cursor-not-allowed');
                 document.querySelectorAll('input[name="auth-toggle"]')[0].checked = true;
-                document.querySelectorAll('input[name="auth-toggle"]')[1].checked = false;
+                // CAPTCHA: Ocultar en login (resetear intentos)
+                intentosFallidos = 0;
+                contenedorCaptcha.classList.add('hidden');
             }
-        };
+            try { grecaptcha.reset(); } catch(e){}
+        }
 
-        // Actualizar el modo cuando se cambian los radio buttons
+        linkAlternar.onclick = (e) => { e.preventDefault(); toggleAuthMode(); };
         document.querySelectorAll('input[name="auth-toggle"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                if (this.value === 'Registro') {
-                    esModoRegistro = true;
-                    btnIngresar.innerText = "Registrarme";
-                    document.getElementById('textoAlternar').innerText = "¿Ya tienes cuenta?";
-                    linkAlternar.innerText = "Inicia sesión";
-                } else {
-                    esModoRegistro = false;
-                    btnIngresar.innerText = "Entrar";
-                    document.getElementById('textoAlternar').innerText = "¿No tienes cuenta?";
-                    linkAlternar.innerText = "Regístrate aquí";
+                if ((this.value === 'Registro' && !esModoRegistro) || (this.value === 'Iniciar Sesión' && esModoRegistro)) {
+                    toggleAuthMode();
                 }
-                
-                document.getElementById('errorLogin').style.display = 'none';
-                document.getElementById('exitoLogin').style.display = 'none';
             });
         });
 
+        // --- PROCESO DE INGRESO (LOGIN/REGISTRO) ---
         btnIngresar.onclick = async () => {
-            const carnet = document.getElementById('inputCarnet').value;
-            const pass = document.getElementById('inputPassword').value;
+            const carnet = inputCarnet.value;
+            const pass = inputPassword.value;
+            
             if (!carnet || !pass) return alert("Llena los campos");
+            if (esModoRegistro && !passwordValida) return alert("La contraseña no es segura");
+
+            // Validar Captcha si corresponde
+            const requiereCaptcha = esModoRegistro || intentosFallidos >= 3;
+            if (requiereCaptcha) {
+                const captchaResponse = grecaptcha.getResponse();
+                if (captchaResponse.length === 0) {
+                    errorLog.style.display = 'block';
+                    errorLog.innerText = "⚠️ Por favor, confirma que no eres un robot.";
+                    return;
+                }
+            }
 
             btnIngresar.disabled = true;
+            const textoOriginal = btnIngresar.innerText;
             btnIngresar.innerText = "Procesando...";
-            const errorLog = document.getElementById('errorLogin');
             errorLog.style.display = 'none';
 
             try {
@@ -408,53 +438,47 @@
                 const data = await res.json();
 
                 if (res.ok && data.autorizado) {
+                    intentosFallidos = 0; // Resetear intentos
                     if (esModoRegistro) {
                         document.getElementById('exitoLogin').style.display = 'block';
-                        setTimeout(() => linkAlternar.click(), 1500);
+                        setTimeout(() => toggleAuthMode(), 2000);
                     } else {
-                        // LOGIN EXITOSO
                         pasoLogin.style.display = 'none';
                         pasoConsentimiento.style.display = 'block';
-                        // MOSTRAR BOTÓN DE CERRAR SESIÓN
                         btnCerrarSesion.style.display = 'block';
                     }
                 } else {
-                    errorLog.style.display = 'block';
-                    errorLog.innerText = data.mensaje || "Error";
+                    handleLoginError(data.mensaje || "Error de autenticación");
                 }
             } catch (e) {
                 console.error(e);
-                errorLog.style.display = 'block';
-                errorLog.innerText = "Error de conexión";
+                handleLoginError("Error de conexión");
             }
-            btnIngresar.disabled = false;
-            btnIngresar.innerText = esModoRegistro ? "Registrarme" : "Entrar";
         };
 
-        // --- LÓGICA DE CERRAR SESIÓN ---
-        btnCerrarSesion.onclick = () => {
-            // 1. Limpiar campos
-            document.getElementById('inputCarnet').value = '';
-            document.getElementById('inputPassword').value = '';
+        function handleLoginError(msg) {
+            errorLog.style.display = 'block';
+            errorLog.innerText = msg;
+            btnIngresar.innerText = esModoRegistro ? "Registrarme" : "Entrar";
             
-            // 2. Detener cámara si está activa
-            if (streamCamara) {
-                streamCamara.getTracks().forEach(t => t.stop());
-                streamCamara = null;
+            // Si estamos en login, aumentar intentos
+            if (!esModoRegistro) {
+                btnIngresar.disabled = false;
+                intentosFallidos++;
+                if (intentosFallidos >= 3) {
+                    contenedorCaptcha.classList.remove('hidden');
+                    avisoCaptcha.classList.remove('hidden');
+                }
+                try { grecaptcha.reset(); } catch(e){}
+            } else {
+                // En registro, si falló (ej: usuario ya existe), dejar botón deshabilitado si la pass es insegura
+                if(passwordValida) btnIngresar.disabled = false;
+                try { grecaptcha.reset(); } catch(e){}
             }
-            
-            // 3. Ocultar todo y mostrar Login
-            pasoConsentimiento.style.display = 'none';
-            pasoSeleccion.style.display = 'none';
-            pasoCapturaCamara.style.display = 'none';
-            pasoCapturaArchivo.style.display = 'none';
-            resultadosDiv.style.display = 'none';
-            
-            pasoLogin.style.display = 'block';
-            
-            // 4. Ocultar el propio botón de cerrar sesión
-            btnCerrarSesion.style.display = 'none';
-        };
+        }
+
+        // --- CERRAR SESIÓN ---
+        btnCerrarSesion.onclick = () => { window.location.reload(); };
 
         // --- FLUJO PRINCIPAL ---
         document.getElementById('btnAceptar').onclick = () => {
@@ -464,105 +488,50 @@
 
         // --- LÓGICA DE CÁMARA ---
         document.getElementById('btnOpcionCamara').onclick = async () => {
-            // Limpiar estado anterior de archivos
             resetearEstadoSubida();
-            
-            // Mostrar paso de cámara
             pasoSeleccion.style.display = 'none';
             pasoCapturaCamara.style.display = 'block';
-            
             try {
                 streamCamara = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = streamCamara;
                 video.style.display = 'block';
                 placeholderCamara.style.display = 'none';
-            } catch (e) { 
-                alert("Error al acceder a la cámara"); 
-                resetearVista(); 
-            }
+            } catch (e) { alert("Error cámara"); resetearVista(); }
         };
 
-        // --- LÓGICA DE SUBIR ARCHIVO ---
+        // --- LÓGICA DE ARCHIVO ---
         document.getElementById('btnOpcionSubir').onclick = () => {
-            // Detener cámara si está activa
-            if (streamCamara) {
-                streamCamara.getTracks().forEach(t => t.stop());
-                streamCamara = null;
-            }
-            
-            // Limpiar estado anterior de cámara
+            if (streamCamara) { streamCamara.getTracks().forEach(t => t.stop()); streamCamara = null; }
             resetearEstadoCamara();
-            
-            // Mostrar paso de subida de archivo
             pasoSeleccion.style.display = 'none';
             pasoCapturaArchivo.style.display = 'block';
         };
 
-        // --- NUEVA LÓGICA MEJORADA PARA SUBIDA DE ARCHIVOS ---
+        // --- UPLOAD HELPERS ---
         const dropZone = document.getElementById('dropZone');
         const estadoSinImagen = document.getElementById('estadoSinImagen');
         const estadoConImagen = document.getElementById('estadoConImagen');
-        const btnSeleccionarArchivo = document.getElementById('btnSeleccionarArchivo');
-        const btnAnalizarArchivo = document.getElementById('btnAnalizarArchivo');
-        const btnCambiarImagen = document.getElementById('btnCambiarImagen');
-
-        // Eventos para la zona de arrastrar y soltar
-        dropZone.addEventListener('click', () => {
-            inputArchivo.click();
-        });
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                inputArchivo.files = files;
-                procesarArchivoSeleccionado(files[0]);
-            }
-        });
-
-        btnSeleccionarArchivo.addEventListener('click', () => {
-            inputArchivo.click();
-        });
-
-        btnCambiarImagen.addEventListener('click', () => {
-            inputArchivo.click();
-        });
-
-        inputArchivo.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                procesarArchivoSeleccionado(file);
-            }
-        });
+        
+        dropZone.onclick = () => inputArchivo.click();
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('dragover');
+        dropZone.ondrop = (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) procesarArchivoSeleccionado(e.dataTransfer.files[0]);
+        };
+        document.getElementById('btnSeleccionarArchivo').onclick = () => inputArchivo.click();
+        document.getElementById('btnCambiarImagen').onclick = () => inputArchivo.click();
+        
+        inputArchivo.onchange = (e) => { if(e.target.files[0]) procesarArchivoSeleccionado(e.target.files[0]); };
 
         function procesarArchivoSeleccionado(file) {
-            // Validar que sea una imagen
-            if (!file.type.match('image.*')) {
-                alert('Por favor, selecciona solo archivos de imagen (JPG, PNG, WEBP)');
-                return;
-            }
-
+            if (!file.type.match('image.*')) return alert('Solo imágenes');
             const reader = new FileReader();
             reader.onload = (ev) => {
-                // Mostrar vista previa
                 vistaPrevia.src = ev.target.result;
                 vistaPrevia.style.display = 'block';
                 placeholderArchivo.style.display = 'none';
-                
-                // Guardar imagen para análisis
                 imagenBase64Final = ev.target.result;
-                
-                // Cambiar a estado con imagen seleccionada
                 estadoSinImagen.style.display = 'none';
                 estadoConImagen.style.display = 'block';
             };
@@ -570,38 +539,25 @@
         }
 
         function resetearEstadoSubida() {
-            // Limpiar archivo seleccionado
-            inputArchivo.value = '';
-            vistaPrevia.style.display = 'none';
-            vistaPrevia.src = '';
-            placeholderArchivo.style.display = 'flex';
-            
-            // Volver al estado inicial
-            estadoSinImagen.style.display = 'block';
-            estadoConImagen.style.display = 'none';
+            inputArchivo.value = ''; vistaPrevia.style.display = 'none'; vistaPrevia.src = '';
+            placeholderArchivo.style.display = 'flex'; estadoSinImagen.style.display = 'block'; estadoConImagen.style.display = 'none';
         }
-
         function resetearEstadoCamara() {
-            // Limpiar cámara
-            video.style.display = 'none';
-            placeholderCamara.style.display = 'flex';
+            video.style.display = 'none'; placeholderCamara.style.display = 'flex';
         }
 
-        // --- CAPTURA ---
+        // --- CAPTURA Y ENVÍO ---
         document.getElementById('btnCapturar').onclick = () => {
             document.getElementById('loaderCamara').style.display = 'block';
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             enviarImagen(canvas.toDataURL('image/jpeg'));
         };
-
         document.getElementById('btnAnalizarArchivo').onclick = () => {
             document.getElementById('loaderArchivo').style.display = 'block';
             enviarImagen(imagenBase64Final);
         };
 
-        // --- ENVÍO ---
         async function enviarImagen(base64) {
             try {
                 const res = await fetch(API_URL, {
@@ -633,10 +589,8 @@
                     <p class="text-gray-500 dark:text-gray-400">Confianza: ${data.confianza}</p>
                 </div>
             `;
-            
             if(data.consejos && data.consejos.length > 0) {
-                html += '<h4 class="text-xl font-bold mb-4">Consejos para ti:</h4>';
-                html += '<div class="space-y-4">';
+                html += '<h4 class="text-xl font-bold mb-4">Consejos para ti:</h4><div class="space-y-4">';
                 data.consejos.forEach(c => {
                     html += `
                         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-l-4 border-primary">
@@ -645,8 +599,7 @@
                                 <span class="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded-full">${c.duracion}</span>
                             </div>
                             <p class="text-gray-600 dark:text-gray-300">${c.texto}</p>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 html += '</div>';
             }
@@ -655,26 +608,16 @@
         }
 
         function resetearVista() {
-            // Detener cámara
-            if (streamCamara) {
-                streamCamara.getTracks().forEach(t => t.stop());
-                streamCamara = null;
-            }
-            
-            // Resetear estados
+            if (streamCamara) { streamCamara.getTracks().forEach(t => t.stop()); streamCamara = null; }
             resetearEstadoCamara();
             resetearEstadoSubida();
-            
-            // Ocultar todos los pasos
             pasoCapturaCamara.style.display = 'none';
             pasoCapturaArchivo.style.display = 'none';
             resultadosDiv.style.display = 'none';
-            
-            // Mostrar selección
             pasoSeleccion.style.display = 'block';
         }
 
-        // Event listeners para botones volver
+        // Event listeners para volver
         document.getElementById('btnVolverCamara').onclick = resetearVista;
         document.getElementById('btnVolverArchivo').onclick = resetearVista;
         document.getElementById('btnReiniciar').onclick = resetearVista;

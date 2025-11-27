@@ -46,35 +46,41 @@ print("3. Insertando datos...")
 # Insertar Usuario de Prueba
 cursor.execute("INSERT INTO Usuarios (carnet, password) VALUES (?, ?)", ('2023001', 'upana123'))
 
-# Insertar Consejos de Bienestar
 consejos_lista = [
-    # FEAR
-    ('FEAR', 'Respiración', 'Respiración 4-7-8', 'Inhala por 4s, sostén 7s, exhala por 8s.', '2 min'),
-    ('FEAR', 'Grounding', '5-4-3-2-1', 'Identifica 5 cosas que ves, 4 que tocas y 3 que oyes.', '3 min'),
+    # FEAR (Enfoque: Regulación del Sistema Nervioso y Realidad)
+    ('FEAR', 'Somático', 'Abrazo de Mariposa', 'Cruza brazos sobre el pecho y da golpecitos alternos en tus hombros.', '2 min'),
+    ('FEAR', 'Cognitivo', 'Verificación de Realidad', 'Pregúntate: ¿Tengo pruebas reales de que esto pasará hoy?', '3 min'),
+    ('FEAR', 'Visualización', 'Lugar Seguro', 'Cierra los ojos e imagina un sitio donde nada malo puede pasar.', '5 min'),
 
-    # CALM
-    ('CALM', 'Enfoque', 'Checklist Rápido', 'Escribe las 3 prioridades del día.', '1 min'),
-    ('CALM', 'Sereno', 'Mantener', 'No entres en situaciones que te alteren', '3 min'),
+    # CALM (Enfoque: Profundización y Consciencia Plena)
+    ('CALM', 'Mindfulness', 'Escaneo Corporal', 'Recorre mentalmente tu cuerpo de pies a cabeza soltando tensión.', '5 min'),
+    ('CALM', 'Reflexión', 'Diario de Gratitud', 'Escribe 3 cosas simples por las que das gracias ahora mismo.', '4 min'),
+    ('CALM', 'Presencia', 'Saboreo del Momento', 'Quédate quieto y disfruta conscientemente de no tener urgencias.', '2 min'),
 
-    # ANGRY
-    ('ANGRY', 'Físico', 'Descarga', 'Aprieta una pelota antiestrés o tensa y relaja puños.', '1 min'),
-    ('ANGRY', 'Físico', 'Movimiento Controlado', 'Realiza 10 sentadillas para liberar tensión de forma segura.', '2 min'),
+    # ANGRY (Enfoque: Enfriamiento Fisiológico y Gestión de Impulsos)
+    ('ANGRY', 'Fisiológico', 'Cambio de Temperatura', 'Lávate la cara o muñecas con agua muy fría para "resetear".', '2 min'),
+    ('ANGRY', 'Expresión', 'Escritura Libre', 'Escribe todo lo que sientes sin filtro y luego rompe el papel.', '5 min'),
+    ('ANGRY', 'Pausa', 'Tiempo Fuera', 'Aléjate físicamente de la situación hasta contar 20 respiraciones.', '3 min'),
 
-    # SAD
-    ('SAD', 'Ánimo', 'Caminata', 'Da una vuelta corta para cambiar de aire.', '5 min'),
-    ('SAD', 'Ánimo', 'Conexión', 'Envía un mensaje breve a alguien de confianza para sentirte acompañado.', '3 min'),
+    # SAD (Enfoque: Autocompasión y Activación Conductual Suave)
+    ('SAD', 'Autocompasión', 'Mano en el Corazón', 'Pon tu mano en el pecho y repite: "Estoy aquí conmigo".', '2 min'),
+    ('SAD', 'Sensorial', 'Ducha Consciente', 'Siente el agua tibia e imagina que limpia la pesadez emocional.', '10 min'),
+    ('SAD', 'Acción', 'Micro-logro', 'Haz una tarea diminuta (ej. tender la cama) para ganar impulso.', '3 min'),
 
-    # HAPPY
-    ('HAPPY', 'Celebración', 'Agradecimiento', 'Anota algo bueno que pasó hoy.', '1 min'),
-    ('HAPPY', 'Celebración', 'Compartir', 'Comparte tu buena noticia o estado con alguien cercano.', '2 min'),
+    # HAPPY (Enfoque: Anclaje y Expansión Social)
+    ('HAPPY', 'Anclaje', 'Foto Mental', 'Detente y captura mentalmente los detalles de este momento.', '1 min'),
+    ('HAPPY', 'Social', 'Elogio Sincero', 'Dile a alguien algo que realmente admiras de él/ella.', '2 min'),
+    ('HAPPY', 'Creatividad', 'Playlist Positiva', 'Escucha o agrega una canción que te haga sentir invencible.', '4 min'),
 
-    # SURPRISED
-    ('SURPRISED', 'Pausa', 'Respiración Profunda', 'Toma tres respiraciones profundas para asimilar.', '1 min'),
-    ('SURPRISED', 'Pausa', 'Observación', 'Identifica tres cosas a tu alrededor para orientarte al presente.', '1 min'),
+    # SURPRISED (Enfoque: Orientación y Asimilación)
+    ('SURPRISED', 'Cognitivo', 'Nombrar la Emoción', 'Di en voz alta: "Me siento sorprendido por..." para procesarlo.', '1 min'),
+    ('SURPRISED', 'Grounding', 'Pies en Tierra', 'Pisa fuerte el suelo descalzo para volver a tu centro.', '2 min'),
+    ('SURPRISED', 'Análisis', 'Pausa de Perspectiva', 'Antes de reaccionar, pregúntate: ¿Esto es amenaza u oportunidad?', '3 min'),
 
-    # NEUTRAL
-    ('NEUTRAL', 'Activación', 'Estiramiento', 'Estira brazos y cuello suavemente.', '2 min'),
-    ('NEUTRAL', 'Activación', 'Hidratación', 'Bebe un vaso de agua para refrescar cuerpo y mente.', '1 min'),
+    # NEUTRAL (Enfoque: Intención y Curiosidad)
+    ('NEUTRAL', 'Crecimiento', 'Curiosidad', 'Observa un objeto común como si fuera la primera vez que lo ves.', '3 min'),
+    ('NEUTRAL', 'Propósito', 'Intención del Día', 'Define una palabra que guíe tus próximas horas (ej. "Paz").', '1 min'),
+    ('NEUTRAL', 'Físico', 'Estiramiento Consciente', 'Estira los brazos hacia el cielo tratando de tocar el techo.', '2 min'),
 ]
 
 cursor.executemany('''
