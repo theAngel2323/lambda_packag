@@ -1,5 +1,5 @@
 // ==========================================
-// ⚠️ PEGA AQUÍ LAS URLs DE TUS MICROSERVICIOS
+// ⚠️ TUS URLs DE MICROSERVICIOS
 const URL_AUTH = "https://hl4h72ulr7.execute-api.us-east-2.amazonaws.com/default/auth"; 
 const URL_CORE = "https://hl4h72ulr7.execute-api.us-east-2.amazonaws.com/default/core"; 
 // ==========================================
@@ -31,10 +31,7 @@ let imagenBase64Final = '';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    // Mostrar solo el paso de login al cargar
     mostrarPaso(pasoLogin);
-    
-    // Inicializar event listeners
     inicializarEventListeners();
 });
 
@@ -111,10 +108,8 @@ async function manejarLogin() {
                 mostrarElemento(exitoLog);
                 setTimeout(() => linkAlternar.click(), 1500);
             } else {
-                // LOGIN EXITOSO
                 ocultarPaso(pasoLogin);
                 mostrarPaso(pasoConsentimiento);
-                // MUESTRA EL BOTÓN DE CERRAR SESIÓN
                 mostrarElemento(btnCerrarSesion);
             }
         } else {
@@ -139,11 +134,10 @@ async function iniciarCamara() {
             video: { facingMode: 'user' } 
         });
         video.srcObject = streamCamara;
-        // MUESTRA EL VIDEO
         mostrarElemento(video);
-        ocultarElemento(placeholderCamara);
+        if(placeholderCamara) ocultarElemento(placeholderCamara);
     } catch (e) { 
-        alert("Error al acceder a la cámara. Por favor, verifica los permisos."); 
+        alert("Error al acceder a la cámara. Verifica los permisos."); 
         resetearVista(); 
     }
 }
@@ -153,19 +147,35 @@ function seleccionarArchivo() {
     inputArchivo.click();
 }
 
+// ⚠️ AQUÍ ESTÁ EL ARREGLO IMPORTANTE PARA QUE NO SE MEZCLEN
 function mostrarCaptura(modo) {
     ocultarPaso(pasoSeleccion);
     mostrarPaso(pasoCaptura);
     
     if (modo === 'camara') {
+        // MODO CÁMARA
         mostrarElemento(document.getElementById('controlesCamara'));
+        mostrarElemento(video);
+        
+        // Ocultar cosas de Archivo
         ocultarElemento(document.getElementById('controlesSubida'));
+        ocultarElemento(vistaPrevia);
+        vistaPrevia.src = ""; // Limpiar imagen vieja
     } else {
+        // MODO ARCHIVO
         mostrarElemento(document.getElementById('controlesSubida'));
+        
+        // Ocultar cosas de Cámara
         ocultarElemento(document.getElementById('controlesCamara'));
-        // MUESTRA VISTA PREVIA VACÍA
-        mostrarElemento(vistaPrevia);
-        ocultarElemento(placeholderCamara);
+        ocultarElemento(video);
+        
+        // Apagar cámara si estaba prendida
+        if (streamCamara) {
+            streamCamara.getTracks().forEach(t => t.stop());
+            streamCamara = null;
+        }
+        
+        if(placeholderCamara) ocultarElemento(placeholderCamara);
     }
 }
 
@@ -179,22 +189,13 @@ function capturarImagen() {
 function manejarSeleccionArchivo(e) {
     const file = e.target.files[0];
     if (file) {
-        // Validar tipo de archivo
-        if (!file.type.startsWith('image/')) {
-            alert('Por favor, selecciona un archivo de imagen válido.');
-            return;
-        }
-        
-        // Validar tamaño (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('La imagen es demasiado grande. Por favor, selecciona una imagen menor a 5MB.');
-            return;
-        }
+        if (!file.type.startsWith('image/')) return alert('Selecciona una imagen válida.');
         
         const reader = new FileReader();
         reader.onload = (ev) => {
             vistaPrevia.src = ev.target.result;
             imagenBase64Final = ev.target.result;
+            mostrarElemento(vistaPrevia); // Asegurarnos de que se vea la foto
             mostrarElemento(document.getElementById('btnAnalizarArchivo'));
         };
         reader.readAsDataURL(file);
@@ -215,7 +216,9 @@ async function enviarImagen(base64) {
             body: JSON.stringify({ image: base64 }) 
         });
         const data = await res.json();
+        
         mostrarResultados(data);
+        
     } catch (e) {
         console.error('Error al analizar imagen:', e);
         mostrarErrorAnalisis();
@@ -225,131 +228,117 @@ async function enviarImagen(base64) {
     ocultarPaso(pasoCaptura);
 }
 
+// --- VISUALIZACIÓN DE RESULTADOS ---
 function mostrarResultados(data) {
-    const tarjetaResultados = resultadosDiv.querySelector('.tarjeta-resultados');
+    const tarjetaResultados = resultadosDiv.querySelector('.tarjeta-resultados') || resultadosDiv;
     
-    let html = `
-        <div class="encabezado-tarjeta">
-            <h2>Resultados de tu Análisis</h2>
-            <p class="subtitulo">Aquí tienes algunas sugerencias para sentirte mejor</p>
-        </div>
-        
-        <div class="contenedor-resultado">
-            <div class="resultado-emocion">
-                <div class="emocion-icono">
-                    <span class="material-symbols-outlined">sentiment_calm</span>
-                </div>
-                <div class="info-emocion">
-                    <h3 class="emocion-titulo">${data.emocion || 'Emoción detectada'}</h3>
-                    <p class="emocion-descripcion">Hemos detectado que puedes estar sintiendo ${(data.emocion || 'esta emoción').toLowerCase()}.</p>
-                    <div class="barra-confianza">
-                        <div class="etiqueta-confianza">
-                            <span>Nivel de Confianza</span>
-                            <span>${data.confianza || 'N/A'}</span>
-                        </div>
-                        <div class="barra-progreso">
-                            <div class="progreso" style="width: ${parseConfianza(data.confianza)}"></div>
-                        </div>
-                    </div>
-                </div>
+    // CASO MULTI-PERSONA (Nuevo Backend)
+    if (data.personas && data.personas.length > 0) {
+        let html = `
+            <div class="encabezado-tarjeta" style="margin-bottom: 20px;">
+                <h2>Análisis Grupal Completado</h2>
+                <p class="subtitulo">Hemos detectado <strong>${data.personas.length}</strong> persona(s)</p>
             </div>
-        </div>
-        
-        <div class="recomendaciones">
-            <h3 class="titulo-recomendaciones">Recomendaciones para ti</h3>
-    `;
-    
-    if(data.consejos && data.consejos.length > 0) {
-        html += `<div class="lista-recomendaciones">`;
-        data.consejos.forEach(c => {
+            <div class="lista-personas" style="text-align: left;">
+        `;
+
+        data.personas.forEach(persona => {
             html += `
-                <div class="item-recomendacion">
-                    <div class="contenido-recomendacion">
-                        <div class="icono-item">
-                            <span class="material-symbols-outlined">self_improvement</span>
-                        </div>
-                        <div class="info-recomendacion">
-                            <h4>${c.titulo || 'Consejo'}</h4>
-                            <p>${c.texto || 'Descripción del consejo'}</p>
-                        </div>
-                    </div>
-                    <div class="acciones-recomendacion">
-                        <span class="duracion">${c.duracion || '5 min'}</span>
-                        <button class="btn-comenzar">Comenzar</button>
-                    </div>
+            <div class="persona-card" style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                
+                <div style="border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                    <h3 style="margin: 0; color: #333;">👤 Persona ${persona.id_persona}</h3>
+                    <span style="background: #eef; color: #0056b3; padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: 0.9em;">
+                        ${persona.emocion} (${persona.confianza})
+                    </span>
                 </div>
+
+                <div class="recomendaciones">
+                    <h4 style="font-size: 1em; color: #666; margin-bottom: 10px;">Recomendaciones personalizadas:</h4>
             `;
+
+            if(persona.consejos && persona.consejos.length > 0) {
+                persona.consejos.forEach(c => {
+                    html += `
+                        <div class="item-recomendacion" style="background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 5px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <h5 style="margin: 0; color: #0056b3;">${c.titulo}</h5>
+                                <span class="duracion" style="font-size: 0.8em; background: #ddd; padding: 2px 6px; border-radius: 4px;">${c.duracion}</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.9em; color: #555;">${c.texto}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p style="font-style: italic; color: #999;">No hay consejos específicos para esta emoción.</p>`;
+            }
+
+            html += `</div></div>`;
         });
+
         html += `</div>`;
+        tarjetaResultados.innerHTML = html;
+
+    } else if (data.emocion) {
+        // CASO INDIVIDUAL (Fallback)
+        tarjetaResultados.innerHTML = `<h3>${data.emocion} (${data.confianza})</h3>`;
     } else {
-        html += `<p class="emocion-descripcion text-center">No hay consejos disponibles en este momento.</p>`;
+        // CASO ERROR / VACÍO
+        tarjetaResultados.innerHTML = `
+            <div class="encabezado-tarjeta">
+                <h2>No se detectaron rostros</h2>
+                <p>Intenta con una foto más clara.</p>
+            </div>
+        `;
     }
-    
-    html += `</div>`;
-    tarjetaResultados.innerHTML = html;
     
     mostrarPaso(resultadosDiv);
     mostrarElemento(document.getElementById('btnReiniciar'));
-}
-
-function parseConfianza(confianza) {
-    if (!confianza) return '50%';
-    const porcentaje = confianza.replace('%', '');
-    return isNaN(porcentaje) ? '50%' : `${porcentaje}%`;
 }
 
 function mostrarErrorAnalisis() {
-    resultadosDiv.querySelector('.tarjeta-resultados').innerHTML = `
+    const tarjetaResultados = resultadosDiv.querySelector('.tarjeta-resultados') || resultadosDiv;
+    tarjetaResultados.innerHTML = `
         <div class="encabezado-tarjeta">
-            <h2>Error en el Análisis</h2>
-            <p class="subtitulo">No pudimos procesar tu imagen</p>
-        </div>
-        <div class="contenedor-resultado">
-            <p class="emocion-descripcion text-center">Por favor, intenta nuevamente con una imagen más clara o verifica tu conexión a internet.</p>
+            <h2 style="color: #dc3545;">Error en el Análisis</h2>
+            <p>No pudimos procesar tu imagen. Intenta de nuevo.</p>
         </div>
     `;
     mostrarPaso(resultadosDiv);
     mostrarElemento(document.getElementById('btnReiniciar'));
 }
 
-// --- FUNCIONES DE UTILIDAD ---
+// --- UTILIDADES Y NAVEGACIÓN ---
 function cerrarSesion() {
-    // 1. Limpiar campos de login
     document.getElementById('inputCarnet').value = '';
     document.getElementById('inputPassword').value = '';
     
-    // 2. Detener cámara si está activa (Limpia recursos)
     if (streamCamara) {
         streamCamara.getTracks().forEach(t => t.stop());
         streamCamara = null;
     }
     
-    // 3. Ocultar todos los pasos excepto el login (¡CORRECCIÓN CLAVE AQUÍ!)
     ocultarPaso(pasoConsentimiento);
     ocultarPaso(pasoSeleccion); 
     ocultarPaso(pasoCaptura);
     ocultarPaso(resultadosDiv);
     ocultarElemento(document.getElementById('btnReiniciar'));
 
-    // 4. Mostrar el paso de Login y ocultar el botón de Cerrar Sesión
     mostrarPaso(pasoLogin);
     ocultarElemento(btnCerrarSesion);
 }
 
 function resetearVista() {
-    // Detener cámara si está activa
     if (streamCamara) {
         streamCamara.getTracks().forEach(t => t.stop());
         streamCamara = null;
     }
     
-    // Limpiar elementos de captura
     ocultarElemento(video);
     ocultarElemento(vistaPrevia);
     vistaPrevia.src = "";
     inputArchivo.value = "";
     
-    // Restablecer controles y ocultar elementos de captura/resultado
     ocultarPaso(resultadosDiv);
     ocultarPaso(pasoCaptura);
     ocultarElemento(document.getElementById('btnReiniciar'));
@@ -358,33 +347,33 @@ function resetearVista() {
     ocultarElemento(document.getElementById('controlesCamara'));
     ocultarElemento(document.getElementById('controlesSubida'));
     
-    // Mostrar placeholder de cámara y botón Volver
     mostrarElemento(document.getElementById('btnVolver'));
-    mostrarElemento(placeholderCamara);
-    
-    // Volver a selección (Propósito original de esta función)
+    if(placeholderCamara) mostrarElemento(placeholderCamara);
     mostrarPaso(pasoSeleccion);
 }
 
-// -------------------------------------------------------------
-// ⚠️ FUNCIONES DE MANEJO DE DOM CORREGIDAS PARA FORZAR VISIBILIDAD
-// -------------------------------------------------------------
+// Helpers de Visibilidad
 function mostrarPaso(elemento) {
-    elemento.classList.remove('oculto');
-    elemento.style.display = 'block'; 
+    if(elemento) {
+        elemento.classList.remove('oculto');
+        elemento.style.display = 'block';
+    }
 }
-
 function ocultarPaso(elemento) {
-    elemento.classList.add('oculto');
-    elemento.style.display = 'none'; 
+    if(elemento) {
+        elemento.classList.add('oculto');
+        elemento.style.display = 'none';
+    }
 }
-
 function mostrarElemento(elemento) {
-    elemento.classList.remove('oculto');
-    elemento.style.display = 'block'; 
+    if(elemento) {
+        elemento.classList.remove('oculto');
+        elemento.style.display = 'block';
+    }
 }
-
 function ocultarElemento(elemento) {
-    elemento.classList.add('oculto');
-    elemento.style.display = 'none'; 
+    if(elemento) {
+        elemento.classList.add('oculto');
+        elemento.style.display = 'none';
+    }
 }

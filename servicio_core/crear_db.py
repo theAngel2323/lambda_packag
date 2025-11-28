@@ -15,7 +15,6 @@ cursor = conn.cursor()
 print("2. Creando tabla de Consejos...")
 
 # --- TABLA DE CONSEJOS ---
-# Solo creamos la tabla necesaria para este microservicio
 cursor.execute('''
     CREATE TABLE Consejos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +63,16 @@ consejos_lista = [
     ('NEUTRAL', 'Crecimiento', 'Curiosidad', 'Observa un objeto común como si fuera la primera vez que lo ves.', '3 min'),
     ('NEUTRAL', 'Propósito', 'Intención del Día', 'Define una palabra que guíe tus próximas horas (ej. "Paz").', '1 min'),
     ('NEUTRAL', 'Físico', 'Estiramiento Consciente', 'Estira los brazos hacia el cielo tratando de tocar el techo.', '2 min'),
+
+    # CONFUSED (Enfoque: Claridad y Estructura) - NUEVO
+    ('CONFUSED', 'Estrategia', 'Divide y Vencerás', 'Rompe el problema grande en 3 pasos pequeños y manejables.', '3 min'),
+    ('CONFUSED', 'Claridad', 'La Pregunta Exacta', 'Escribe en una frase qué es exactamente lo que no entiendes.', '2 min'),
+    ('CONFUSED', 'Pausa', 'Reseteo Mental', 'Aléjate del material de estudio por 5 minutos, bebe agua y vuelve.', '5 min'),
+
+    # DISGUSTED (Enfoque: Tolerancia y Limpieza Sensorial) - NUEVO
+    ('DISGUSTED', 'Sensorial', 'Reseteo Olfativo', 'Huele algo fuerte y agradable (café, limón) para cortar la sensación.', '1 min'),
+    ('DISGUSTED', 'Perspectiva', 'Aceptación Radical', 'Acepta que la situación existe sin que tenga que gustarte.', '2 min'),
+    ('DISGUSTED', 'Físico', 'Sacudida', 'Sacude las manos y pies vigorosamente para soltar la tensión física.', '1 min'),
 ]
 
 cursor.executemany('''
@@ -74,4 +83,4 @@ cursor.executemany('''
 conn.commit()
 conn.close()
 
-print(f"¡Éxito! Base de datos '{db_name}' regenerada exclusivamente para el Microservicio Core.")
+print(f"¡Éxito! Base de datos '{db_name}' regenerada con las nuevas emociones.")
