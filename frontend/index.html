@@ -5,64 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienestar Estudiantil UPANA</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 </head>
 <body>
+    <button id="btnCerrarSesion" class="btn-cerrar-sesion oculto">
+        <span class="material-symbols-outlined align-middle mr-1">logout</span>
+        Cerrar Sesión
+    </button>
 
-    <button id="btnCerrarSesion">Cerrar Sesión 🚪</button>
-
-    <h1>Bienestar Estudiantil</h1>
-    <p>Universidad Panamericana de Guatemala</p>
-
-    <div id="pasoLogin" class="contenedor-media">
-        <h3 id="tituloLogin">🔐 Iniciar Sesión</h3>
-        
-        <input type="text" id="inputCarnet" placeholder="Ingresa tu Carnet" class="input-login">
-        <input type="password" id="inputPassword" placeholder="Contraseña" class="input-login">
-        
-        <p id="errorLogin" class="msg-error">Error</p>
-        <p id="exitoLogin" class="msg-exito">¡Registro exitoso! Ingresa ahora.</p>
-
-        <button id="btnIngresar" class="btn btn-primary">Entrar</button>
-
-        <p class="texto-alternar">
-            <span id="textoAlternar">¿No tienes cuenta?</span>
-            <a href="#" id="linkAlternar">Regístrate aquí</a>
-        </p>
-    </div>
-
-    <div id="pasoConsentimiento" class="contenedor-media" style="display: none;">
-        <h3>🔒 Aviso de Privacidad</h3>
-        <p class="texto-legal">Este servicio analizará tu expresión facial para ofrecerte consejos de bienestar. <strong>Tu foto no se almacenará</strong> y el análisis es privado. Al continuar, aceptas participar voluntariamente.</p>
-        <button id="btnAceptar" class="btn btn-primary">Acepto Participar</button>
-    </div>
-
-    <div id="pasoSeleccion" class="contenedor-media" style="display: none;">
-        <h3>¿Cómo deseas analizar tu emoción?</h3>
-        <button id="btnOpcionCamara" class="btn btn-primary">📷 Usar Cámara</button>
-        <button id="btnOpcionSubir" class="btn btn-outline">📁 Subir Foto</button>
-    </div>
-
-    <div id="pasoCaptura" class="contenedor-media" style="display: none;">
-        <video id="video" autoplay playsinline></video>
-        <img id="vistaPrevia" alt="Vista previa">
-        <canvas id="canvas" style="display:none;"></canvas>
-
-        <div id="controlesCamara" style="display:none;">
-            <button id="btnCapturar" class="btn btn-primary">Analizar Ahora</button>
+    <div id="pasoLogin" class="contenedor-paso">
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h2 id="tituloLogin">🔐 Iniciar Sesión</h2>
+                <p class="subtitulo">Universidad Panamericana de Guatemala</p>
+            </div>
+            
+            <div class="contenido-formulario">
+                <div class="campo-input">
+                    <span class="material-symbols-outlined icono-input">badge</span>
+                    <input type="text" id="inputCarnet" placeholder="Ingresa tu Carnet" class="input-texto">
+                </div>
+                
+                <div class="campo-input">
+                    <span class="material-symbols-outlined icono-input">lock</span>
+                    <input type="password" id="inputPassword" placeholder="Contraseña" class="input-texto">
+                </div>
+                
+                <p id="errorLogin" class="mensaje-error"></p>
+                <p id="exitoLogin" class="mensaje-exito">¡Registro exitoso! Ingresa ahora.</p>
+                
+                <button id="btnIngresar" class="btn-primario">
+                    Entrar
+                </button>
+                
+                <div class="texto-alternar">
+                    <span id="textoAlternar">¿No tienes cuenta?</span>
+                    <a href="#" id="linkAlternar">Regístrate aquí</a>
+                </div>
+            </div>
         </div>
-
-        <div id="controlesSubida" style="display:none;">
-            <input type="file" id="inputArchivo" accept="image/*" style="display: none;">
-            <button id="btnSeleccionarArchivo" class="btn btn-secondary">Seleccionar Imagen</button>
-            <button id="btnAnalizarArchivo" class="btn btn-primary" style="display:none;">Analizar Imagen</button>
-        </div>
-
-        <button id="btnVolver" class="btn btn-outline" style="margin-top: 10px;">⬅ Volver</button>
-        <div id="loader" style="display: none; margin-top: 15px; color: #0056b3;">🔄 Analizando...</div>
     </div>
 
-    <div id="resultados" class="contenedor-media" style="display: none;"></div>
-    <button id="btnReiniciar" class="btn btn-secondary" style="display: none;">Nueva Consulta</button>
+    <div id="pasoConsentimiento" class="contenedor-paso oculto">
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <div class="icono-grande">
+                    <span class="material-symbols-outlined">privacy_tip</span>
+                </div>
+                <h2>Aviso de Privacidad</h2>
+            </div>
+            
+            <div class="contenido-legal">
+                <div class="item-info">
+                    <div class="icono-item">
+                        <span class="material-symbols-outlined">no_photography</span>
+                    </div>
+                    <div>
+                        <p class="titulo-item">Tus fotos no se guardan</p>
+                        <p class="descripcion-item">Las imágenes nunca se almacenan en nuestros servidores y se procesan en tiempo real.</p>
+                    </div>
+                </div>
+                
+                <div class="item-info">
+                    <div class="icono-item">
+                        <span class="material-symbols-outlined">encrypted</span>
+                    </div>
+                    <div>
+                        <p class="titulo-item">Análisis 100% privado</p>
+                        <p class="descripcion-item">El análisis se procesa de forma anónima directamente en tu dispositivo.</p>
+                    </div>
+                </div>
+                
+                <div class="item-info">
+                    <div class="icono-item">
+                        <span class="material-symbols-outlined">sentiment_satisfied</span>
+                    </div>
+                    <div>
+                        <p class="titulo-item">Enfoque en tu bienestar</p>
+                        <p class="descripcion-item">El único objetivo es ofrecerte apoyo y consejos para tu bienestar emocional.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btnAceptar" class="btn-primario">
+                Acepto Participar
+            </button>
+        </div>
+    </div>
+
+    <div id="pasoSeleccion" class="contenedor-paso oculto">
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h2>¿Cómo te sientes hoy?</h2>
+                <p class="subtitulo">Elige cómo quieres analizar tu emoción</p>
+            </div>
+            
+            <div class="contenedor-opciones">
+                <button id="btnOpcionCamara" class="opcion-analisis">
+                    <span class="material-symbols-outlined icono-opcion">videocam</span>
+                    <span class="texto-opcion">Usar Cámara</span>
+                </button>
+                
+                <button id="btnOpcionSubir" class="opcion-analisis">
+                    <span class="material-symbols-outlined icono-opcion">upload_file</span>
+                    <span class="texto-opcion">Subir Foto</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pasoCaptura" class="contenedor-paso oculto">
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h2>Analiza tu Emoción</h2>
+            </div>
+            
+            <div class="contenedor-captura">
+                <video id="video" autoplay playsinline class="elemento-captura oculto"></video>
+                <img id="vistaPrevia" alt="Vista previa" class="elemento-captura oculto">
+                <canvas id="canvas" class="oculto"></canvas>
+                
+                <div id="placeholderCamara" class="placeholder-captura">
+                    <span class="material-symbols-outlined">photo_camera</span>
+                </div>
+            </div>
+            
+            <div id="controlesCamara" class="oculto">
+                <button id="btnCapturar" class="btn-primario">
+                    Analizar Ahora
+                </button>
+            </div>
+
+            <div id="controlesSubida" class="oculto">
+                <input type="file" id="inputArchivo" accept="image/*" class="oculto">
+                <div class="contenedor-botones">
+                    <button id="btnSeleccionarArchivo" class="btn-secundario">
+                        Seleccionar Imagen
+                    </button>
+                    <button id="btnAnalizarArchivo" class="btn-primario oculto">
+                        Analizar
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnVolver" class="btn-volver">
+                <span class="material-symbols-outlined align-middle mr-1">arrow_back</span>
+                Volver
+            </button>
+            
+            <div id="loader" class="cargando oculto">
+                <span class="material-symbols-outlined animado">refresh</span>
+                Analizando...
+            </div>
+        </div>
+    </div>
+
+    <div id="resultados" class="contenedor-paso oculto">
+        <div class="tarjeta-resultados">
+            </div>
+    </div>
+    
+    <button id="btnReiniciar" class="btn-reiniciar oculto">
+        <span class="material-symbols-outlined align-middle mr-1">refresh</span>
+        Nueva Consulta
+    </button>
 
     <script src="script.js"></script>
 </body>
