@@ -1,27 +1,21 @@
 import sqlite3
 import os
 
-# Nombre del archivo de base de datos
-db_name = 'consejos.db'
+# Nombre del archivo de base de datos para el servicio CORE
+db_name = 'servicio_core/consejos.db'
 
-# Opcional: Eliminar el archivo físico antes de empezar para asegurar limpieza total
+# 1. Limpieza total: Eliminar el archivo físico si existe para empezar de cero
 if os.path.exists(db_name):
     os.remove(db_name)
-    print("Base de datos anterior eliminada.")
+    print(f"Base de datos anterior '{db_name}' eliminada para regeneración limpia.")
 
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
-print("1. Reiniciando tablas...")
-
-# --- PASO CRÍTICO: BORRAR TABLAS SI EXISTEN ---
-# Esto evita que los datos se dupliquen si corres el script varias veces
-cursor.execute("DROP TABLE IF EXISTS Consejos")
-cursor.execute("DROP TABLE IF EXISTS Usuarios")
-
-print("2. Creando tablas nuevas...")
+print("2. Creando tabla de Consejos...")
 
 # --- TABLA DE CONSEJOS ---
+# Solo creamos la tabla necesaria para este microservicio
 cursor.execute('''
     CREATE TABLE Consejos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,18 +27,7 @@ cursor.execute('''
     )
 ''')
 
-# --- TABLA DE USUARIOS (Login/Registro) ---
-cursor.execute('''
-    CREATE TABLE Usuarios (
-        carnet TEXT PRIMARY KEY,
-        password TEXT NOT NULL
-    )
-''')
-
-print("3. Insertando datos...")
-
-# Insertar Usuario de Prueba
-cursor.execute("INSERT INTO Usuarios (carnet, password) VALUES (?, ?)", ('2023001', 'upana123'))
+print("3. Insertando catálogo de consejos...")
 
 consejos_lista = [
     # FEAR (Enfoque: Regulación del Sistema Nervioso y Realidad)
@@ -91,4 +74,4 @@ cursor.executemany('''
 conn.commit()
 conn.close()
 
-print(f"¡Listo! Base de datos '{db_name}' regenerada sin duplicados.")
+print(f"¡Éxito! Base de datos '{db_name}' regenerada exclusivamente para el Microservicio Core.")

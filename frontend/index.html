@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienestar Estudiantil UPANA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <button id="btnCerrarSesion">Cerrar Sesión 🚪</button>
+
+    <h1>Bienestar Estudiantil</h1>
+    <p>Universidad Panamericana de Guatemala</p>
+
+    <div id="pasoLogin" class="contenedor-media">
+        <h3 id="tituloLogin">🔐 Iniciar Sesión</h3>
+        
+        <input type="text" id="inputCarnet" placeholder="Ingresa tu Carnet" class="input-login">
+        <input type="password" id="inputPassword" placeholder="Contraseña" class="input-login">
+        
+        <p id="errorLogin" class="msg-error">Error</p>
+        <p id="exitoLogin" class="msg-exito">¡Registro exitoso! Ingresa ahora.</p>
+
+        <button id="btnIngresar" class="btn btn-primary">Entrar</button>
+
+        <p class="texto-alternar">
+            <span id="textoAlternar">¿No tienes cuenta?</span>
+            <a href="#" id="linkAlternar">Regístrate aquí</a>
+        </p>
+    </div>
+
+    <div id="pasoConsentimiento" class="contenedor-media" style="display: none;">
+        <h3>🔒 Aviso de Privacidad</h3>
+        <p class="texto-legal">Este servicio analizará tu expresión facial para ofrecerte consejos de bienestar. <strong>Tu foto no se almacenará</strong> y el análisis es privado. Al continuar, aceptas participar voluntariamente.</p>
+        <button id="btnAceptar" class="btn btn-primary">Acepto Participar</button>
+    </div>
+
+    <div id="pasoSeleccion" class="contenedor-media" style="display: none;">
+        <h3>¿Cómo deseas analizar tu emoción?</h3>
+        <button id="btnOpcionCamara" class="btn btn-primary">📷 Usar Cámara</button>
+        <button id="btnOpcionSubir" class="btn btn-outline">📁 Subir Foto</button>
+    </div>
+
+    <div id="pasoCaptura" class="contenedor-media" style="display: none;">
+        <video id="video" autoplay playsinline></video>
+        <img id="vistaPrevia" alt="Vista previa">
+        <canvas id="canvas" style="display:none;"></canvas>
+
+        <div id="controlesCamara" style="display:none;">
+            <button id="btnCapturar" class="btn btn-primary">Analizar Ahora</button>
+        </div>
+
+        <div id="controlesSubida" style="display:none;">
+            <input type="file" id="inputArchivo" accept="image/*" style="display: none;">
+            <button id="btnSeleccionarArchivo" class="btn btn-secondary">Seleccionar Imagen</button>
+            <button id="btnAnalizarArchivo" class="btn btn-primary" style="display:none;">Analizar Imagen</button>
+        </div>
+
+        <button id="btnVolver" class="btn btn-outline" style="margin-top: 10px;">⬅ Volver</button>
+        <div id="loader" style="display: none; margin-top: 15px; color: #0056b3;">🔄 Analizando...</div>
+    </div>
+
+    <div id="resultados" class="contenedor-media" style="display: none;"></div>
+    <button id="btnReiniciar" class="btn btn-secondary" style="display: none;">Nueva Consulta</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
